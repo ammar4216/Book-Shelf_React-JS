@@ -1,25 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Navbar from "./components/Layout/Navbar";
+import BookShelves from "./components/Books/BookShelves";
+import Search from "./components/Pages/Search";
+import SearchButton from "./components/Layout/SearchButton";
+import * as BookAPI from "./components/API/BooksAPI";
+import "./App.css";
 
-function App() {
+const App = () => {
+  // const [showSearchPage, setShowSearchPage] = useState(false);
+  const [books, setBooks] = useState([]);
+
+  // const searchPageUpdate = (state) => {
+  //   setShowSearchPage(state);
+  // };
+
+  useEffect(() => {
+    BookAPI.getAll().then((res) => {
+      console.log(res);
+      setBooks(res);
+    });
+  }, []);
+
+  const changeBookShelfHandler = (book, shelf) => {
+    BookAPI.update(book, shelf).then(() => {
+      BookAPI.getAll().then((res) => {
+        setBooks(res);
+      });
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Router>
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <div className="list-books">
+                <Navbar />
+                <BookShelves
+                  books={books}
+                  changeBookShelf={changeBookShelfHandler}
+                />
+                <SearchButton />
+              </div>
+            )}
+          />
+
+          <Route
+            exact
+            path="/search"
+            render={() => (
+              <Search changeBookShelf={changeBookShelfHandler} books={books} />
+            )}
+          />
+        </Switch>
+      </Router>
     </div>
   );
-}
+};
 
 export default App;
